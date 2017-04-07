@@ -30,5 +30,12 @@ namespace LibraryAPI.Controllers
             Book.DeleteBook(Setting.PathToLibraryDatabase, ID);
             return Ok($"BookID = {ID} was successfully deleted.");
         }
+
+        [HttpPost]
+        public IHttpActionResult UpdateBook(string ID, string attribute, string newValue)
+        {
+            Book.UpdateBook(Setting.PathToLibraryDatabase, ID, attribute, newValue);
+            return Ok($"BookID = {ID} was successfully updated.");
+        }
     }
 }

@@ -101,7 +101,22 @@ namespace LibraryAPI.Models
         {
             using(var connection = new SqlConnection(pathToDatabase))
             {
-                var cmd = new SqlCommand(@"DELETE FROM Book WHERE ID=@ID", connection);
+                var cmd = new SqlCommand("DELETE FROM Book WHERE ID=@ID", connection);
+                cmd.Parameters.AddWithValue("@ID", ID);
+
+                connection.Open();
+                cmd.ExecuteNonQuery();
+                connection.Close();
+            }
+        }
+
+        public static void UpdateBook(string pathToDatabase, string ID, string attribute, string newValue)
+        {
+            using(var connection = new SqlConnection(pathToDatabase))
+            {
+                var cmd = new SqlCommand($"UPDATE Book SET [{attribute}] = @newValue " +
+                    $"WHERE ID = @ID", connection);
+                cmd.Parameters.AddWithValue("@newValue", newValue);
                 cmd.Parameters.AddWithValue("@ID", ID);
 
                 connection.Open();
