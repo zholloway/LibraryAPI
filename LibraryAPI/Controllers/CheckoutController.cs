@@ -20,5 +20,11 @@ namespace LibraryAPI.Controllers
                 return Ok(Book.GetBooks(connection, IsCheckedOut));
             }
         }
+
+        [HttpPost]
+        public IHttpActionResult CheckOutBook(string ID)
+        {
+            return Ok(Book.TryCheckOutBook(Setting.PathToLibraryDatabase, ID));
+        }
     }
 }

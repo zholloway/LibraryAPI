@@ -58,7 +58,9 @@ namespace LibraryAPI.Models
             var bookList = new List<String>();
             var bookString = String.Empty;
 
-            var cmd = new SqlCommand($"SELECT * FROM Book WHERE IsCheckedOut='{IsCheckedOut}'", connection);
+            var cmd = new SqlCommand($"SELECT * FROM Book WHERE IsCheckedOut=@IsCheckedOut", connection);
+            cmd.Parameters.AddWithValue("@IsCheckedOut", IsCheckedOut);
+
             connection.Open();
             var reader = cmd.ExecuteReader();
             while(reader.Read())
@@ -123,6 +125,52 @@ namespace LibraryAPI.Models
                 cmd.ExecuteNonQuery();
                 connection.Close();
             }
+        }
+
+        public static string TryCheckOutBook(string pathToDatabase, string ID)
+        {
+            var rv = String.Empty;
+            var bookName = String.Empty;
+            var dueBack = String.Empty;
+            var checkedOutStatus = String.Empty;
+
+            using (var connection = new SqlConnection(pathToDatabase))
+            {
+                var cmd = new SqlCommand($"SELECT * FROM Book WHERE ID=@ID", connection);
+                cmd.Parameters.AddWithValue("@ID", ID);
+
+                connection.Open();
+                var reader = cmd.ExecuteReader();
+                while (reader.Read())
+                {
+                    checkedOutStatus = reader["IsCheckedOut"].ToString();
+                    bookName = reader["Title"].ToString();
+                    dueBack = reader["DueBackDate"].ToString();
+                }
+                connection.Close();
+
+                if (checkedOutStatus == "True")
+                {
+                    rv = $"Sorry, {bookName} is already checked out. It is due back {dueBack}.";
+                }
+                else if (checkedOutStatus == "False")
+                {
+                    cmd = new SqlCommand($"UPDATE Book " +
+                        $"SET [IsCheckedOut] = True, [LastCheckedOutDate] = @LastCheckedOutDate, [DueDate] = @DueDate " +
+                        $"WHERE ID = @ID", connection);
+
+                    cmd.Parameters.AddWithValue("@LastCheckedOutDate", DateTime.Now);
+                    cmd.Parameters.AddWithValue("@DueDate", DateTime.Now.AddDays(10));
+
+                    connection.Open();
+                    cmd.ExecuteNonQuery();
+                    connection.Close();
+
+                    rv = $"You checked out {bookName}. It is due back {DateTime.Now.AddDays(10)}";
+                }
+            }
+
+            return rv;
         }
     }   
 }
