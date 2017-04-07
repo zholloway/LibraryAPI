@@ -14,10 +14,7 @@ namespace LibraryAPI.Controllers
         [HttpGet]
         public IHttpActionResult GetAllBooks()
         {
-            using (var connection = new SqlConnection(Setting.PathToLibraryDatabase))
-            {
-                return Ok(Book.GetAllBooks(connection));
-            }
+            return Ok(Book.GetAllBooks(Setting.PathToLibraryDatabase));
         }
         
         [HttpPut]
@@ -27,6 +24,11 @@ namespace LibraryAPI.Controllers
             return Ok("The book was successfully added.");           
         }
 
-
+        [HttpDelete]
+        public IHttpActionResult DeleteBook(string ID)
+        {
+            Book.DeleteBook(Setting.PathToLibraryDatabase, ID);
+            return Ok($"BookID = {ID} was successfully deleted.");
+        }
     }
 }

@@ -18,35 +18,38 @@ namespace LibraryAPI.Models
         public DateTime LastCheckedOutDate { get; set; }
         public DateTime DueBackDate { get; set; }
 
-        public static List<String> GetAllBooks(SqlConnection connection)
+        public static List<String> GetAllBooks(string pathToDatabase)
         {
             var bookList = new List<String>();
 
-            var cmd = new SqlCommand("SELECT * FROM Book", connection);
-            connection.Open();
-            var reader = cmd.ExecuteReader();
-            while (reader.Read())
+            using(var connection = new SqlConnection(pathToDatabase))
             {
-                var bookString = $"Book ID {reader["ID"]}: {reader["Title"]} by {reader["Author"]}." +
-                    $" A {reader["Genre"]} story published in {reader["YearPublished"]}.";
-                if (reader["IsCheckedOut"].ToString() == "True")
+                var cmd = new SqlCommand("SELECT * FROM Book", connection);
+                connection.Open();
+                var reader = cmd.ExecuteReader();
+                while (reader.Read())
                 {
-                    bookString += $" This book is currently checked out. " +
-                        $"It was checked out on {reader["LastCheckedOutDate"]}, and its due date is {reader["DueBackDate"]}";
-                }
-                else if (reader["IsCheckedOut"].ToString() == "False" || reader["IsCheckedOut"].ToString() == null)
-                {
-                    bookString += "This book is available for checkout.";
-                    if(reader["LastCheckedOutDate"].ToString() != String.Empty)
+                    var bookString = $"Book ID {reader["ID"]}: {reader["Title"]} by {reader["Author"]}." +
+                        $" A {reader["Genre"]} story published in {reader["YearPublished"]}.";
+                    if (reader["IsCheckedOut"].ToString() == "True")
                     {
-                        bookString += $" It was last checked out on {reader["LastCheckedOutDate"]}.";
+                        bookString += $" This book is currently checked out. " +
+                            $"It was checked out on {reader["LastCheckedOutDate"]}, and its due date is {reader["DueBackDate"]}";
                     }
+                    else if (reader["IsCheckedOut"].ToString() == "False" || reader["IsCheckedOut"].ToString() == null)
+                    {
+                        bookString += "This book is available for checkout.";
+                        if (reader["LastCheckedOutDate"].ToString() != String.Empty)
+                        {
+                            bookString += $" It was last checked out on {reader["LastCheckedOutDate"]}.";
+                        }
+                    }
+
+                    bookList.Add(bookString);
                 }
-
-                bookList.Add(bookString);
+                connection.Close();
             }
-            connection.Close();
-
+            
             return bookList;
         }
 
@@ -92,6 +95,19 @@ namespace LibraryAPI.Models
                 cmd.ExecuteNonQuery();
                 connection.Close();
             }      
+        }
+
+        public static void DeleteBook(string pathToDatabase, string ID)
+        {
+            using(var connection = new SqlConnection(pathToDatabase))
+            {
+                var cmd = new SqlCommand(@"DELETE FROM Book WHERE ID=@ID", connection);
+                cmd.Parameters.AddWithValue("@ID", ID);
+
+                connection.Open();
+                cmd.ExecuteNonQuery();
+                connection.Close();
+            }
         }
     }   
 }
