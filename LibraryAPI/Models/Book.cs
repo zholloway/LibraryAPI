@@ -22,12 +22,28 @@ namespace LibraryAPI.Models
         {
             var bookList = new List<String>();
 
-            var cmd = new SqlCommand("SELECT Title, Author FROM Book", connection);
+            var cmd = new SqlCommand("SELECT * FROM Book", connection);
             connection.Open();
             var reader = cmd.ExecuteReader();
             while (reader.Read())
             {
-                bookList.Add($"{reader["Title"]} by {reader["Author"]}");
+                var bookString = $"Book ID {reader["ID"]}: {reader["Title"]} by {reader["Author"]}." +
+                    $" A {reader["Genre"]} story published in {reader["YearPublished"]}.";
+                if (reader["IsCheckedOut"].ToString() == "True")
+                {
+                    bookString += $" This book is currently checked out. " +
+                        $"It was checked out on {reader["LastCheckedOutDate"]}, and its due date is {reader["DueBackDate"]}";
+                }
+                else if (reader["IsCheckedOut"].ToString() == "False" || reader["IsCheckedOut"].ToString() == null)
+                {
+                    bookString += "This book is available for checkout.";
+                    if(reader["LastCheckedOutDate"].ToString() != String.Empty)
+                    {
+                        bookString += $" It was last checked out on {reader["LastCheckedOutDate"]}.";
+                    }
+                }
+
+                bookList.Add(bookString);
             }
             connection.Close();
 
