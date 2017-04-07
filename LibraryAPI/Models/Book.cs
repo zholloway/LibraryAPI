@@ -156,11 +156,13 @@ namespace LibraryAPI.Models
                 else if (checkedOutStatus == "False")
                 {
                     cmd = new SqlCommand($"UPDATE Book " +
-                        $"SET [IsCheckedOut] = True, [LastCheckedOutDate] = @LastCheckedOutDate, [DueDate] = @DueDate " +
+                        $"SET [IsCheckedOut] = @IsCheckedout, [LastCheckedOutDate] = @LastCheckedOutDate, [DueBackDate] = @DueDate " +
                         $"WHERE ID = @ID", connection);
 
                     cmd.Parameters.AddWithValue("@LastCheckedOutDate", DateTime.Now);
                     cmd.Parameters.AddWithValue("@DueDate", DateTime.Now.AddDays(10));
+                    cmd.Parameters.AddWithValue("@ID", ID);
+                    cmd.Parameters.AddWithValue("@IsCheckedOut", "True");
 
                     connection.Open();
                     cmd.ExecuteNonQuery();
