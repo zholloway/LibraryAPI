@@ -50,6 +50,34 @@ namespace LibraryAPI.Models
             return bookList;
         }
 
+        public static List<String> GetBooks(SqlConnection connection, string IsCheckedOut)
+        {
+            var bookList = new List<String>();
+            var bookString = String.Empty;
+
+            var cmd = new SqlCommand($"SELECT * FROM Book WHERE IsCheckedOut='{IsCheckedOut}'", connection);
+            connection.Open();
+            var reader = cmd.ExecuteReader();
+            while(reader.Read())
+            {
+                if (IsCheckedOut == "True")
+                {
+                    bookString = $"{reader["Title"]} by {reader["Author"]} was " +
+                    $"checked out on {reader["LastCheckedOutDate"]} and is due back {reader["DueBackDate"]}.";
+                    bookList.Add(bookString);
+                }
+                else if (IsCheckedOut == "False")
+                {
+                    bookString = $"{reader["Title"]} by {reader["Author"]} is available for checkout.";
+                    bookList.Add(bookString);
+                }
+                
+            }
+            connection.Close();
+
+            return bookList;
+        }
+
         public static void AddNewBook(Book newBook, string pathToDatabase)
         {
             using (var connection = new SqlConnection(pathToDatabase))

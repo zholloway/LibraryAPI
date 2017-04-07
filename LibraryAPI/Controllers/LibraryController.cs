@@ -11,22 +11,22 @@ namespace LibraryAPI.Controllers
 {
     public class LibraryController : ApiController
     {
-        const string PathToLibraryDatabase = @"Server=localhost\SQLEXPRESS;Database=Library;Trusted_Connection=True;";
-
         [HttpGet]
         public IHttpActionResult GetAllBooks()
         {
-            using (var connection = new SqlConnection(PathToLibraryDatabase))
+            using (var connection = new SqlConnection(Setting.PathToLibraryDatabase))
             {
                 return Ok(Book.GetAllBooks(connection));
             }
         }
-
+        
         [HttpPut]
         public IHttpActionResult AddNewBook(Book newBook)
         {
-            Book.AddNewBook(newBook, PathToLibraryDatabase);
+            Book.AddNewBook(newBook, Setting.PathToLibraryDatabase);
             return Ok("The book was successfully added.");           
         }
+
+
     }
 }
